@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "430134130883",
+    "project_id": "mnadhem-todo",
+    "storage_bucket": "mnadhem-todo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:430134130883:android:93c2a61df5d2a1b647ca76",
+        "android_client_info": {
+          "package_name": "com.example.mnadhem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBTs4-NdVNvRAxeT-6ZfL2Bpr8zZhRqDg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
