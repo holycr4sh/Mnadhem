@@ -1,40 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp">
+    android:paddingVertical="12dp"
+    android:paddingHorizontal="16dp"
+    android:gravity="center_vertical">
 
     <CheckBox
-        android:id="@+id/checkBox"
+        android:id="@+id/checkBoxCompleted"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
-
-    <TextView
-        android:id="@+id/itemName"
-        android:fontFamily="casual"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:text="Task Name Goes Here"
-        android:textSize="24sp"
-        app:layout_constraintStart_toEndOf="@+id/checkBox"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:layout_marginEnd="16dp" />
+
     <TextView
-        android:id="@+id/itemDueDate"
+        android:id="@+id/textViewTaskName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_marginStart="8dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
         android:fontFamily="casual"
-        android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@id/checkBox"/>
+        tools:text="Grocery Shopping"
+        app:layout_constraintStart_toEndOf="@+id/checkBoxCompleted"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:ellipsize="end"
+        android:maxLines="1" />
 
-
-
+    <TextView
+        android:id="@+id/textViewDueDate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        tools:text="Due: May 10, 2025"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toEndOf="@+id/checkBoxCompleted"
+        app:layout_constraintTop_toBottomOf="@+id/textViewTaskName"
+        app:layout_constraintEnd_toStartOf="@+id/textViewDueTime"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        android:visibility="gone" /> <TextView
+    android:id="@+id/textViewDueTime"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textSize="12sp"
+    tools:text="18:00"
+    android:layout_marginStart="8dp"
+    app:layout_constraintStart_toEndOf="@+id/textViewDueDate"
+    app:layout_constraintTop_toBottomOf="@+id/textViewTaskName"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintBaseline_toBaselineOf="@+id/textViewDueDate"
+    android:visibility="gone" />
 </androidx.constraintlayout.widget.ConstraintLayout>

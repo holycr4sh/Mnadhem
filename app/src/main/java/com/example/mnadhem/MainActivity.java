@@ -3,7 +3,6 @@ package com.example.mnadhem;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -34,6 +33,7 @@ import java.util.Locale;
 import android.widget.DatePicker;
 import android.app.TimePickerDialog;
 import android.widget.TimePicker;
+import android.util.Log; // Import Log
 
 public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTaskItemClickListener {
     private TaskAdapter taskAdapter;
@@ -285,13 +285,30 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         editTextTaskName.setText(task.getName());
         editTextTaskDescription.setText(task.getDescription());
 
+        // Set the spinner adapter
+        ArrayAdapter<CharSequence> priorityAdapter = ArrayAdapter.createFromResource(
+                this, R.array.priority_options, android.R.layout.simple_spinner_item);
+        priorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerPriority.setAdapter(priorityAdapter);
+
         // Set the spinner selection
         String[] priorityOptions = getResources().getStringArray(R.array.priority_options);
+        int selectionIndex = -1;
         for (int i = 0; i < priorityOptions.length; i++) {
             if (priorityOptions[i].equals(task.getPriority())) {
-                spinnerPriority.setSelection(i);
+                selectionIndex = i;
                 break;
             }
+        }
+
+        // Set the selection only if a matching priority is found
+        if (selectionIndex != -1) {
+            spinnerPriority.setSelection(selectionIndex);
+        } else {
+            // Handle the case where the task's priority doesn't match any option
+            // You might want to set a default selection or log an error
+            spinnerPriority.setSelection(0); // Set to the first item as a default
+            Log.e("EditDialog", "Warning: Task priority '" + task.getPriority() + "' not found in options.");
         }
 
         //show the date.
@@ -348,7 +365,6 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                             {
                                 e.printStackTrace();
                             }
-
                         }
 
                         if (taskName.isEmpty()) {

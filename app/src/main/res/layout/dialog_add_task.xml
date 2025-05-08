@@ -10,9 +10,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Task Name"
-        android:inputType="text" />
+        android:inputType="text"
+        android:fontFamily="casual"/>
 
     <EditText
+        android:fontFamily="casual"
         android:id="@+id/editTextTaskDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,15 +22,18 @@
         android:inputType="textMultiLine" />
 
     <TextView
+        android:fontFamily="casual"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Priority:"
         android:layout_marginTop="16dp" />
 
     <Spinner
+        android:fontFamily="casual"
         android:id="@+id/spinnerPriority"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:popupBackground="@color/white"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -37,6 +42,7 @@
         android:layout_marginTop="16dp">
 
         <TextView
+            android:fontFamily="casual"
             android:id="@+id/textViewDueDate"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -44,10 +50,12 @@
             android:text="Due Date" />
 
         <Button
+            android:fontFamily="casual"
             android:id="@+id/buttonPickDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pick Date" />
+            android:text="Pick Date"
+            android:backgroundTint="@color/black"/>
 
     </LinearLayout>
 
@@ -58,6 +66,7 @@
         android:layout_marginTop="8dp">
 
         <TextView
+            android:fontFamily="casual"
             android:id="@+id/textViewDueTime"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -65,10 +74,12 @@
             android:text="Due Time" />
 
         <Button
+            android:fontFamily="casual"
             android:id="@+id/buttonPickTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pick Time" />
+            android:text="Pick Time"
+            android:backgroundTint="@color/black"/>
 
     </LinearLayout>
 
