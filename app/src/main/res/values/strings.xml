@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Mnadhem</string>
     <string name="Tasks">Tasks</string>
+    <string name="no_tasks_yet">No tasks yet!</string>
 </resources>
