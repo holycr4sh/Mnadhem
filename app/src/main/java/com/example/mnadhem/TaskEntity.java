@@ -1,29 +1,26 @@
 package com.example.mnadhem;
 
-import java.sql.Time;
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import androidx.room.Ignore;
 import java.util.Date;
-import java.util.UUID;
+import java.sql.Time;
 
-public class Task {
+@Entity(tableName = "tasks")
+public class TaskEntity {
+
+    @PrimaryKey
+    @NonNull
     private String id;
     private String name;
     private String description;
-
     private Date dueDate;
-
     private Time dueTime;
     private String priority;
     private boolean isCompleted;
-    public Task(String name, String description, Date dueDate, Time dueTime, String priority, boolean isCompleted) {
-        this.id = UUID.randomUUID().toString();
-        this.name = name;
-        this.description = description;
-        this.dueDate=dueDate;
-        this.dueTime=dueTime;
-        this.priority=priority;
-        this.isCompleted=isCompleted;
-    }
-    public Task(String id, String name, String description, Date dueDate, Time dueTime, String priority, boolean isCompleted) {
+
+    public TaskEntity(String id, String name, String description, Date dueDate, Time dueTime, String priority, boolean isCompleted) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -32,16 +29,22 @@ public class Task {
         this.priority = priority;
         this.isCompleted = isCompleted;
     }
-    public Task(String name) {
-        this.id = UUID.randomUUID().toString();
+
+    // Example of a secondary constructor that you might use in your code
+    @Ignore
+    public TaskEntity(String name, String description) {
         this.name = name;
-        this.isCompleted=false;
-        this.priority="Low";
+        this.description = description;
     }
 
+    // Getters and setters
 
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -90,18 +93,5 @@ public class Task {
 
     public void setCompleted(boolean completed) {
         isCompleted = completed;
-    }
-
-    @Override
-    public String toString() {
-        return "Task{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", isCompleted=" + isCompleted +
-                ", dueDate=" + dueDate +
-                ", due time=" + dueTime +
-                ", priority=" + priority +
-                '}';
     }
 }
