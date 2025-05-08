@@ -1,10 +1,8 @@
 package com.example.mnadhem;
 
 import android.app.Application;
-
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,13 +24,31 @@ public class TaskViewModel extends AndroidViewModel {
         return allTasks;
     }
 
-    public void insert(TaskEntity task) {
-        executorService.execute(() -> taskDao.insert(task));
+    // Modified insert to take Task, convert to TaskEntity
+    public void insert(Task task) {
+        TaskEntity taskEntity = new TaskEntity(
+                task.getId(),
+                task.getName(),
+                task.getDescription(),
+                task.getDueDate(),
+                task.getDueTime(),
+                task.getPriority(),
+                task.isCompleted()
+        );
+        executorService.execute(() -> taskDao.insert(taskEntity));
     }
 
+    // Modified update to take Task, convert to TaskEntity
     public void update(Task task) {
-        // Convert Task to TaskEntity
-        TaskEntity taskEntity = new TaskEntity(task.getId(), task.getName(), task.getDescription(), task.getDueDate(), task.getDueTime(), task.getPriority(), task.isCompleted());
+        TaskEntity taskEntity = new TaskEntity(
+                task.getId(),
+                task.getName(),
+                task.getDescription(),
+                task.getDueDate(),
+                task.getDueTime(),
+                task.getPriority(),
+                task.isCompleted()
+        );
         executorService.execute(() -> taskDao.update(taskEntity));
     }
 

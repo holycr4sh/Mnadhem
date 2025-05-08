@@ -2,4 +2,9 @@
     <string name="app_name">Mnadhem</string>
     <string name="Tasks">Tasks</string>
     <string name="no_tasks_yet">No tasks yet!</string>
+    <string-array name="priority_options">
+        <item>Low</item>
+        <item>Medium</item>
+        <item>High</item>
+    </string-array>
 </resources>

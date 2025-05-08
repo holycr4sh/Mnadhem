@@ -8,21 +8,21 @@ public class Task {
     private String id;
     private String name;
     private String description;
-
     private Date dueDate;
-
     private Time dueTime;
     private String priority;
     private boolean isCompleted;
+
     public Task(String name, String description, Date dueDate, Time dueTime, String priority, boolean isCompleted) {
         this.id = UUID.randomUUID().toString();
         this.name = name;
         this.description = description;
-        this.dueDate=dueDate;
-        this.dueTime=dueTime;
-        this.priority=priority;
-        this.isCompleted=isCompleted;
+        this.dueDate = dueDate;
+        this.dueTime = dueTime;
+        this.priority = priority;
+        this.isCompleted = isCompleted;
     }
+
     public Task(String id, String name, String description, Date dueDate, Time dueTime, String priority, boolean isCompleted) {
         this.id = id;
         this.name = name;
@@ -32,13 +32,13 @@ public class Task {
         this.priority = priority;
         this.isCompleted = isCompleted;
     }
+
     public Task(String name) {
         this.id = UUID.randomUUID().toString();
         this.name = name;
-        this.isCompleted=false;
-        this.priority="Low";
+        this.isCompleted = false;
+        this.priority = "Low";
     }
-
 
     public String getId() {
         return id;

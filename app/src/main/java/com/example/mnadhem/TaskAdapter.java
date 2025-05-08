@@ -8,10 +8,8 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
@@ -45,56 +43,34 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
         Task currentTask = taskList.get(position);
-        holder.bind(currentTask, listener);
+        holder.bind(currentTask); // Use the bind method.
     }
 
     @Override
     public int getItemCount() {
-        return taskList == null ? 0 : taskList.size();
+        return taskList.size();
     }
 
-    public void setTasks(List<Task> newTasks) {
-        this.taskList = newTasks;
+    public void setTaskList(List<Task> taskList) {
+        this.taskList = taskList;
         notifyDataSetChanged();
     }
 
-    public void addTask(Task task) {
-        this.taskList.add(task);
-        notifyItemInserted(taskList.size() - 1);
-    }
-
-    public void removeTask(int position) {
-        if (position >= 0 && position < taskList.size()) {
-            this.taskList.remove(position);
-            notifyItemRemoved(position);
-        }
-    }
-
-    public Task getTaskAt(int position) {
-        return taskList.get(position);
-    }
-
-    static class TaskViewHolder extends RecyclerView.ViewHolder {
+    public class TaskViewHolder extends RecyclerView.ViewHolder {
         CheckBox checkBoxCompleted;
-        TextView textViewTitle;
+        TextView itemNameTextView;
         TextView textViewDueDate;
 
         public TaskViewHolder(@NonNull View itemView) {
             super(itemView);
             checkBoxCompleted = itemView.findViewById(R.id.checkBox);
-            textViewTitle = itemView.findViewById(R.id.itemName);
+            itemNameTextView = itemView.findViewById(R.id.itemName);
             textViewDueDate = itemView.findViewById(R.id.itemDueDate);
         }
 
-        public void bind(final Task task, final OnTaskItemClickListener listener) {
-            textViewTitle.setText(task.getName());
+        public void bind(final Task task) {
+            itemNameTextView.setText(task.getName());
             checkBoxCompleted.setChecked(task.isCompleted());
-
-            if (task.isCompleted()) {
-                textViewTitle.setPaintFlags(textViewTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            } else {
-                textViewTitle.setPaintFlags(textViewTitle.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-            }
 
             if (task.getDueDate() != null) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyy", Locale.getDefault());
