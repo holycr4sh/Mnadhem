@@ -30,14 +30,11 @@ public class TaskEntity {
         this.isCompleted = isCompleted;
     }
 
-    // Example of a secondary constructor that you might use in your code
     @Ignore
     public TaskEntity(String name, String description) {
         this.name = name;
         this.description = description;
     }
-
-    // Getters and setters
 
     public String getId() {
         return id;

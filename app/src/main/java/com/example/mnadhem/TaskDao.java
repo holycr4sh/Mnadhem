@@ -10,6 +10,7 @@ import java.util.List;
 
 @Dao
 public interface TaskDao {
+
     @Insert
     void insert(TaskEntity task);
 

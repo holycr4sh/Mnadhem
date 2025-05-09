@@ -16,9 +16,34 @@
         android:gravity="start"
         android:padding="0dp"
         android:text="@string/Tasks"
+        android:textColor="@color/white"
         android:textSize="38sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/sortSpinner"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Spinner
+        android:id="@+id/sortSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:entries="@array/sort_options"
+        android:fontFamily="casual"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toStartOf="@+id/filterSpinner"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Spinner
+        android:id="@+id/filterSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:entries="@array/filter_options"
+        android:fontFamily="casual"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -26,22 +51,23 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/fab"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/header"
-        app:layout_constraintBottom_toTopOf="@+id/fab"/>
+        app:layout_constraintTop_toBottomOf="@+id/header" />
 
     <TextView
         android:id="@+id/textViewEmpty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/no_tasks_yet"
+        android:textColor="@color/white"
         android:textSize="18sp"
         android:visibility="gone"
-        app:layout_constraintTop_toTopOf="@+id/recyclerViewTasks"
         app:layout_constraintBottom_toBottomOf="@+id/recyclerViewTasks"
+        app:layout_constraintEnd_toEndOf="@+id/recyclerViewTasks"
         app:layout_constraintStart_toStartOf="@+id/recyclerViewTasks"
-        app:layout_constraintEnd_toEndOf="@+id/recyclerViewTasks" />
+        app:layout_constraintTop_toTopOf="@+id/recyclerViewTasks" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
@@ -50,10 +76,23 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:clickable="true"
+        app:backgroundTint="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@android:drawable/ic_input_add"
-        app:tint="@color/white"
-        app:backgroundTint="@color/black"/>
+        app:tint="@color/white" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabSearch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
+        android:clickable="true"
+        app:backgroundTint="@color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@android:drawable/ic_menu_search"
+        app:tint="@color/white" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

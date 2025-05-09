@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
 @Database(entities = {TaskEntity.class}, version = 1, exportSchema = false)
-@TypeConverters({Converters.class}) // Create this Converters class (see below) if you need to store Date/Time
+@TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase instance;
 
@@ -17,10 +17,9 @@ public abstract class AppDatabase extends RoomDatabase {
         if (instance == null) {
             instance = Room.databaseBuilder(context.getApplicationContext(),
                             AppDatabase.class, "task_database")
-                    .fallbackToDestructiveMigration() // Handle schema updates
+                    .fallbackToDestructiveMigration()
                     .build();
         }
         return instance;
     }
 }
-

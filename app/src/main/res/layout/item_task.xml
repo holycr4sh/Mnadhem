@@ -4,55 +4,68 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingVertical="12dp"
-    android:paddingHorizontal="16dp"
-    android:gravity="center_vertical">
+    android:layout_margin="8dp"
+    android:background="@color/black"
+    android:padding="16dp">
 
     <CheckBox
         android:id="@+id/checkBoxCompleted"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:buttonTint="@color/white"
+        android:fontFamily="casual"
+        android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginEnd="16dp" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/textViewTaskName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
         android:fontFamily="casual"
-        tools:text="Grocery Shopping"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/checkBoxCompleted"
         app:layout_constraintTop_toTopOf="parent"
+        tools:text="Task Name" />
+
+    <TextView
+        android:id="@+id/textViewTaskDescription"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="casual"
+        android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
-        android:ellipsize="end"
-        android:maxLines="1" />
+        app:layout_constraintStart_toEndOf="@+id/checkBoxCompleted"
+        app:layout_constraintTop_toBottomOf="@+id/textViewTaskName"
+        tools:text="Task Description" />
 
     <TextView
         android:id="@+id/textViewDueDate"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
-        tools:text="Due: May 10, 2025"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="casual"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/checkBoxCompleted"
-        app:layout_constraintTop_toBottomOf="@+id/textViewTaskName"
-        app:layout_constraintEnd_toStartOf="@+id/textViewDueTime"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        android:visibility="gone" /> <TextView
-    android:id="@+id/textViewDueTime"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:textSize="12sp"
-    tools:text="18:00"
-    android:layout_marginStart="8dp"
-    app:layout_constraintStart_toEndOf="@+id/textViewDueDate"
-    app:layout_constraintTop_toBottomOf="@+id/textViewTaskName"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintBaseline_toBaselineOf="@+id/textViewDueDate"
-    android:visibility="gone" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewTaskDescription"
+        tools:text="Due Date: Jan 01, 2024" />
+    <TextView
+        android:id="@+id/textViewDueTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

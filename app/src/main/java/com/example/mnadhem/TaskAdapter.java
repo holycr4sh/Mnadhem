@@ -9,11 +9,14 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.sql.Time;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
+class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
     private Context context;
     private List<Task> taskList;
@@ -35,7 +38,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_task, parent, false);
-        return new TaskViewHolder(itemView);
+        return new TaskViewHolder(itemView, parent.getContext());
     }
 
     @Override
@@ -47,60 +50,46 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyy", Locale.getDefault());
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
-        if (currentTask.getDueDate() != null) {
-            holder.dueDateTextView.setText("Due: " + dateFormat.format(currentTask.getDueDate()));
+        Date dueDate = currentTask.getDueDate();
+        if (dueDate != null) {
+            holder.dueDateTextView.setText("Due: " + dateFormat.format(dueDate));
             holder.dueDateTextView.setVisibility(View.VISIBLE);
-            if (currentTask.getDueTime() != null) {
-                holder.dueTimeTextView.setText(timeFormat.format(currentTask.getDueTime()));
+
+            Time dueTime = currentTask.getDueTime();
+            if (dueTime != null) {
+                holder.dueTimeTextView.setText(timeFormat.format(dueTime));
                 holder.dueTimeTextView.setVisibility(View.VISIBLE);
             } else {
                 holder.dueTimeTextView.setVisibility(View.GONE);
             }
         } else {
             holder.dueDateTextView.setVisibility(View.GONE);
-            holder.dueTimeTextView.setVisibility(View.GONE);
         }
 
-        // Apply strikethrough if the task is completed
-        if (currentTask.isCompleted()) {
-            holder.taskNameTextView.setPaintFlags(holder.taskNameTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            holder.dueDateTextView.setPaintFlags(holder.dueDateTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            holder.dueTimeTextView.setPaintFlags(holder.dueTimeTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-        } else {
-            holder.taskNameTextView.setPaintFlags(holder.taskNameTextView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-            holder.dueDateTextView.setPaintFlags(holder.dueDateTextView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-            holder.dueTimeTextView.setPaintFlags(holder.dueTimeTextView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-        }
+        updateTaskCompletionUI(holder, currentTask.isCompleted());
 
-        holder.checkBoxCompleted.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (listener != null) {
-                listener.onTaskCheckChanged(currentTask, isChecked);
-            }
-            // Update the strikethrough immediately when the checkbox changes
-            if (isChecked) {
-                holder.taskNameTextView.setPaintFlags(holder.taskNameTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                holder.dueDateTextView.setPaintFlags(holder.dueDateTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                holder.dueTimeTextView.setPaintFlags(holder.dueTimeTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            } else {
-                holder.taskNameTextView.setPaintFlags(holder.taskNameTextView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                holder.dueDateTextView.setPaintFlags(holder.dueDateTextView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                holder.dueTimeTextView.setPaintFlags(holder.dueTimeTextView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-            }
-        });
+        holder.checkBoxCompleted.setOnCheckedChangeListener((buttonView, isChecked) ->
+                listener.onTaskCheckChanged(currentTask, isChecked)
+        );
 
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onTaskItemClick(currentTask);
-            }
-        });
+        holder.itemView.setOnClickListener(v -> listener.onTaskItemClick(currentTask));
 
         holder.itemView.setOnLongClickListener(v -> {
-            if (listener != null) {
-                listener.onTaskItemLongClick(currentTask);
-                return true;
-            }
-            return false;
+            listener.onTaskItemLongClick(currentTask);
+            return true;
         });
+    }
+
+    private void updateTaskCompletionUI(TaskViewHolder holder, boolean isCompleted) {
+        int flags = holder.taskNameTextView.getPaintFlags();
+        if (isCompleted) {
+            flags |= Paint.STRIKE_THRU_TEXT_FLAG;
+        } else {
+            flags &= (~Paint.STRIKE_THRU_TEXT_FLAG);
+        }
+        holder.taskNameTextView.setPaintFlags(flags);
+        holder.dueDateTextView.setPaintFlags(flags);
+        holder.dueTimeTextView.setPaintFlags(flags);
     }
 
     @Override
@@ -113,13 +102,21 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         TextView dueDateTextView;
         TextView dueTimeTextView;
         CheckBox checkBoxCompleted;
+        Context context;
 
-        public TaskViewHolder(@NonNull View itemView) {
+        public TaskViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
+            this.context = context;
             taskNameTextView = itemView.findViewById(R.id.textViewTaskName);
             dueDateTextView = itemView.findViewById(R.id.textViewDueDate);
             dueTimeTextView = itemView.findViewById(R.id.textViewDueTime);
             checkBoxCompleted = itemView.findViewById(R.id.checkBoxCompleted);
+
+            int whiteColor = context.getResources().getColor(R.color.white);
+            taskNameTextView.setTextColor(whiteColor);
+            dueDateTextView.setTextColor(whiteColor);
+            dueTimeTextView.setTextColor(whiteColor);
+            checkBoxCompleted.setTextColor(whiteColor);
         }
     }
 

@@ -1,46 +1,49 @@
 package com.example.mnadhem;
 
-import android.app.DatePickerDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.text.InputType;
 import android.widget.EditText;
+import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import java.sql.Time;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID; // Import UUID
+import android.widget.Button;
 import android.app.DatePickerDialog;
-import java.util.Calendar;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-import android.widget.DatePicker;
 import android.app.TimePickerDialog;
-import android.widget.TimePicker;
-import android.util.Log; // Import Log
+import java.text.SimpleDateFormat;
+import java.util.Comparator;
+import java.util.Locale;
+import android.view.View;
+import android.app.AlertDialog;
+import android.view.LayoutInflater;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
+import android.widget.Toast;
+import java.sql.Time;
+import java.text.ParseException;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import java.util.ArrayList;
+import java.util.List;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.lifecycle.ViewModelProvider;
+import java.util.Date;
+import android.graphics.Paint;
+import android.widget.AdapterView;
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTaskItemClickListener {
+
+    private RecyclerView taskRecyclerView;
+    private TextView emptyTaskTextView;
     private TaskAdapter taskAdapter;
-    private RecyclerView recyclerViewTasks;
-    private TextView textViewEmpty;
     private TaskViewModel taskViewModel;
-    private List<Task> taskList = new ArrayList<>(); // Keep a Task list
+    private List<Task> taskList = new ArrayList<>();
+    private Spinner sortOptionsSpinner;
+    private Spinner filterOptionsSpinner;
+    private FloatingActionButton searchTaskFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,17 +56,48 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
             return insets;
         });
 
-        recyclerViewTasks = findViewById(R.id.recyclerViewTasks);
-        textViewEmpty = findViewById(R.id.textViewEmpty);
-        recyclerViewTasks.setLayoutManager(new LinearLayoutManager(this));
-
-        // Initialize the adapter with an empty list and the listener
+        taskRecyclerView = findViewById(R.id.recyclerViewTasks);
+        emptyTaskTextView = findViewById(R.id.textViewEmpty);
+        taskRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         taskAdapter = new TaskAdapter(this, taskList, this);
-        recyclerViewTasks.setAdapter(taskAdapter);
-
+        taskRecyclerView.setAdapter(taskAdapter);
         taskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
+
+        sortOptionsSpinner = findViewById(R.id.sortSpinner);
+        filterOptionsSpinner = findViewById(R.id.filterSpinner);
+        searchTaskFab = findViewById(R.id.fabSearch);
+
+        setupSpinners();
+        setupSearchFab();
+        observeTasks();
+
+        FloatingActionButton addTaskFab = findViewById(R.id.fab);
+        addTaskFab.setOnClickListener(view -> showAddTaskDialog());
+    }
+
+    private void setupSpinners() {
+        sortOptionsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                applyFiltersAndSort();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        filterOptionsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                applyFiltersAndSort();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+    private void observeTasks() {
         taskViewModel.getAllTasks().observe(this, taskEntities -> {
-            // Convert TaskEntity list to Task list
             List<Task> tasks = new ArrayList<>();
             for (TaskEntity taskEntity : taskEntities) {
                 tasks.add(new Task(
@@ -76,322 +110,264 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                         taskEntity.isCompleted()
                 ));
             }
-            taskList.clear();  // Clear the old list
-            taskList.addAll(tasks); // Add the new tasks
-            taskAdapter.setTaskList(taskList); // Update the adapter
-            if (tasks.isEmpty()) {
-                textViewEmpty.setVisibility(View.VISIBLE);
-                recyclerViewTasks.setVisibility(View.GONE);
-            } else {
-                textViewEmpty.setVisibility(View.GONE);
-                recyclerViewTasks.setVisibility(View.VISIBLE);
-            }
-        });
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showAddTaskDialog();
-            }
+            taskList.clear();
+            taskList.addAll(tasks);
+            applyFiltersAndSort();
+            updateUIVisibility();
         });
     }
 
+    private void updateUIVisibility() {
+        if (taskList.isEmpty()) {
+            emptyTaskTextView.setVisibility(View.VISIBLE);
+            taskRecyclerView.setVisibility(View.GONE);
+        } else {
+            emptyTaskTextView.setVisibility(View.GONE);
+            taskRecyclerView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void setupSearchFab() {
+        searchTaskFab.setOnClickListener(v -> showSearchTaskDialog());
+    }
+
+    private void applyFiltersAndSort() {
+        List<Task> filteredAndSortedTasks = new ArrayList<>(taskList);
+        applyFilters(filteredAndSortedTasks);
+        applySort(filteredAndSortedTasks);
+        taskAdapter.setTaskList(filteredAndSortedTasks);
+    }
+
+    private void applyFilters(List<Task> tasks) {
+        String filterOption = filterOptionsSpinner.getSelectedItem().toString();
+        if ("Completed".equals(filterOption)) {
+            tasks.removeIf(task -> !task.isCompleted());
+        } else if ("Incomplete".equals(filterOption)) {
+            tasks.removeIf(Task::isCompleted);
+        }
+    }
+
+    private void applySort(List<Task> tasks) {
+        String sortOption = sortOptionsSpinner.getSelectedItem().toString();
+        if ("Due Date".equals(sortOption)) {
+            tasks.sort((task1, task2) -> {
+                if (task1.getDueDate() == null && task2.getDueDate() == null) return 0;
+                if (task1.getDueDate() == null) return 1;
+                if (task2.getDueDate() == null) return -1;
+                return task1.getDueDate().compareTo(task2.getDueDate());
+            });
+        } else if ("Priority".equals(sortOption)) {
+            tasks.sort(Comparator.comparing(Task::getPriority));
+        }
+    }
+
     private void showAddTaskDialog() {
+        showTaskDialog(null, "Add New Task");
+    }
+
+    private void showEditTaskDialog(final Task task) {
+        showTaskDialog(task, "Edit Task");
+    }
+
+    private void showTaskDialog(final Task task, String title) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_add_task, null);
         builder.setView(dialogView);
 
-        final EditText editTextTaskName = dialogView.findViewById(R.id.editTextTaskName);
-        final EditText editTextTaskDescription = dialogView.findViewById(R.id.editTextTaskDescription);
-        final Spinner spinnerPriority = dialogView.findViewById(R.id.spinnerPriority);
-        final TextView textViewDueDate = dialogView.findViewById(R.id.textViewDueDate);
-        final Button buttonPickDate = dialogView.findViewById(R.id.buttonPickDate);
-        final TextView textViewDueTime = dialogView.findViewById(R.id.textViewDueTime);
-        final Button buttonPickTime = dialogView.findViewById(R.id.buttonPickTime);
+        final EditText taskNameEditText = dialogView.findViewById(R.id.editTextTaskName);
+        final EditText taskDescriptionEditText = dialogView.findViewById(R.id.editTextTaskDescription);
+        final Spinner prioritySpinner = dialogView.findViewById(R.id.spinnerPriority);
+        final TextView dueDateTextView = dialogView.findViewById(R.id.textViewDueDate);
+        final Button pickDateButton = dialogView.findViewById(R.id.buttonPickDate);
+        final TextView dueTimeTextView = dialogView.findViewById(R.id.textViewDueTime);
+        final Button pickTimeButton = dialogView.findViewById(R.id.buttonPickTime);
 
+        setupPrioritySpinner(prioritySpinner);
+        final Calendar selectedCalendar = Calendar.getInstance();
+
+        if (task != null) {
+            populateTaskDetails(task, taskNameEditText, taskDescriptionEditText, prioritySpinner,
+                    dueDateTextView, dueTimeTextView, selectedCalendar);
+        }
+
+        pickDateButton.setOnClickListener(v -> showDatePickerDialog(dueDateTextView, selectedCalendar));
+        pickTimeButton.setOnClickListener(v -> showTimePickerDialog(dueTimeTextView, selectedCalendar));
+
+        builder.setTitle(title)
+                .setPositiveButton(task == null ? "Add" : "Update", (dialog, which) ->
+                        processTaskInput(task, taskNameEditText, taskDescriptionEditText, prioritySpinner,
+                                selectedCalendar, dueDateTextView, dueTimeTextView))
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        builder.create().show();
+    }
+
+    private void setupPrioritySpinner(Spinner spinner) {
         ArrayAdapter<CharSequence> priorityAdapter = ArrayAdapter.createFromResource(
                 this, R.array.priority_options, android.R.layout.simple_spinner_item);
         priorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerPriority.setAdapter(priorityAdapter);
+        spinner.setAdapter(priorityAdapter);
+    }
 
-        final Calendar selectedCalendar = Calendar.getInstance();
-        buttonPickDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDatePickerDialog(textViewDueDate, selectedCalendar);
-            }
-        });
+    private void populateTaskDetails(Task task, EditText nameEditText, EditText descriptionEditText,
+                                     Spinner prioritySpinner, TextView dueDateTextView,
+                                     TextView dueTimeTextView, Calendar selectedCalendar) {
+        nameEditText.setText(task.getName());
+        descriptionEditText.setText(task.getDescription());
+        prioritySpinner.setSelection(
+                ((ArrayAdapter) prioritySpinner.getAdapter()).getPosition(task.getPriority()));
 
-        buttonPickTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showTimePickerDialog(textViewDueTime, selectedCalendar);
-            }
-        });
+        if (task.getDueDate() != null) {
+            selectedCalendar.setTime(task.getDueDate());
+            dueDateTextView.setText(formatDate(task.getDueDate()));
+        }
 
-        builder.setTitle("Add New Task")
-                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String taskName = editTextTaskName.getText().toString().trim();
-                        String taskDescription = editTextTaskDescription.getText().toString().trim();
-                        String priority = spinnerPriority.getSelectedItem().toString();
-                        Date dueDate = selectedCalendar.getTime(); // Use the Calendar's Date
-                        Time dueTime = null; // You might need to get this from the time picker
-                        if (textViewDueTime.getText() != "Due Time")
-                        {
-                            try {
-                                SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                                dueTime = new Time(timeFormat.parse(textViewDueTime.getText().toString()).getTime());
-                            }
-                            catch(Exception e)
-                            {
-                                e.printStackTrace();
-                            }
+        if (task.getDueTime() != null) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date(task.getDueTime().getTime()));
+            selectedCalendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY));
+            selectedCalendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE));
+            dueTimeTextView.setText(formatTime(selectedCalendar.getTime()));
+        }
+    }
 
-                        }
+    private void processTaskInput(Task task, EditText nameEditText, EditText descriptionEditText,
+                                  Spinner prioritySpinner, Calendar selectedCalendar,
+                                  TextView dueDateTextView, TextView dueTimeTextView) {
+        String name = nameEditText.getText().toString().trim();
+        if (name.isEmpty()) {
+            showToast("Task name cannot be empty");
+            return;
+        }
 
-                        if (taskName.isEmpty()) {
-                            Toast.makeText(MainActivity.this, "Task name cannot be empty", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        // Create a new Task object
-                        Task newTask = new Task(taskName, taskDescription, dueDate, dueTime, priority, false);
-                        // Insert the new task
-                        taskViewModel.insert(newTask);
-                        dialog.dismiss();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
+        String description = descriptionEditText.getText().toString().trim();
+        String priority = prioritySpinner.getSelectedItem().toString();
+        Date dueDate = selectedCalendar.getTime();
+        Time dueTime = parseTime(dueTimeTextView.getText().toString());
 
-        AlertDialog dialog = builder.create();
+        if (task == null) {
+            taskViewModel.insert(new Task(name, description, dueDate, dueTime, priority, false));
+        } else {
+            task.setName(name);
+            task.setDescription(description);
+            task.setPriority(priority);
+            task.setDueDate(dueDate);
+            task.setDueTime(dueTime);
+            taskViewModel.update(task);
+        }
+    }
+
+    private Time parseTime(String timeText) {
+        if (timeText.equals("Due Time") || timeText.isEmpty()) {
+            return null;
+        }
+        try {
+            return new Time(new SimpleDateFormat("HH:mm", Locale.getDefault()).parse(timeText).getTime());
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void showDatePickerDialog(final TextView dateTextView, final Calendar calendar) {
+        DatePickerDialog dialog = new DatePickerDialog(this,
+                (view, year, month, dayOfMonth) -> {
+                    calendar.set(year, month, dayOfMonth);
+                    dateTextView.setText(formatDate(calendar.getTime()));
+                },
+                calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
         dialog.show();
     }
 
-    private void showDatePickerDialog(final TextView dueDateTextView, final Calendar selectedCalendar) {
-        int year = selectedCalendar.get(Calendar.YEAR);
-        int month = selectedCalendar.get(Calendar.MONTH);
-        int dayOfMonth = selectedCalendar.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                this,
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        selectedCalendar.set(year, month, dayOfMonth);
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyy", Locale.getDefault());
-                        dueDateTextView.setText(dateFormat.format(selectedCalendar.getTime()));
-                    }
+    private void showTimePickerDialog(final TextView timeTextView, final Calendar calendar) {
+        TimePickerDialog dialog = new TimePickerDialog(this,
+                (view, hourOfDay, minute) -> {
+                    calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                    calendar.set(Calendar.MINUTE, minute);
+                    timeTextView.setText(formatTime(calendar.getTime()));
                 },
-                year,
-                month,
-                dayOfMonth
-        );
-        datePickerDialog.show();
+                calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true);
+        dialog.show();
     }
 
-    private void showTimePickerDialog(final TextView dueTimeTextView, final Calendar selectedCalendar) {
-        int hourOfDay = selectedCalendar.get(Calendar.HOUR_OF_DAY);
-        int minute = selectedCalendar.get(Calendar.MINUTE);
+    private String formatDate(Date date) {
+        return new SimpleDateFormat("MMM dd, yyy", Locale.getDefault()).format(date);
+    }
 
-        TimePickerDialog timePickerDialog = new TimePickerDialog(
-                this,
-                new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        selectedCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                        selectedCalendar.set(Calendar.MINUTE, minute);
-                        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                        dueTimeTextView.setText(timeFormat.format(selectedCalendar.getTime()));
-                    }
-                },
-                hourOfDay,
-                minute,
-                true // Set to true for 24-hour format, false for 12-hour
-        );
-        timePickerDialog.show();
+    private String formatTime(Date date) {
+        return new SimpleDateFormat("HH:mm", Locale.getDefault()).format(date);
+    }
+
+    private void showSearchTaskDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Search Task");
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        builder.setPositiveButton("Search", (dialog, which) -> {
+            String searchText = input.getText().toString().trim();
+            searchTask(searchText);
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        builder.create().show();
+    }
+
+    private void searchTask(String searchText) {
+        List<Task> searchResults = new ArrayList<>();
+        for (Task task : taskList) {
+            if (task.getName().toLowerCase().contains(searchText.toLowerCase())) {
+                searchResults.add(task);
+            }
+        }
+        taskAdapter.setTaskList(searchResults);
     }
 
     @Override
     public void onTaskCheckChanged(Task task, boolean isChecked) {
         task.setCompleted(isChecked);
         taskViewModel.update(task);
+        applyFiltersAndSort();
     }
 
     @Override
     public void onTaskItemClick(Task task) {
-        // Handle task item click (e.g., show details or edit)
         showEditTaskDialog(task);
     }
 
     @Override
     public void onTaskItemLongClick(Task task) {
-        // Show a dialog to confirm deletion
         showDeleteConfirmationDialog(task);
     }
 
     private void showDeleteConfirmationDialog(final Task task) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Delete Task")
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Task")
                 .setMessage("Are you sure you want to delete this task?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Convert Task to TaskEntity for deletion
-                        TaskEntity taskEntity = new TaskEntity(
-                                task.getId(),
-                                task.getName(),
-                                task.getDescription(),
-                                task.getDueDate(),
-                                task.getDueTime(),
-                                task.getPriority(),
-                                task.isCompleted()
-                        );
-                        taskViewModel.delete(taskEntity);
-                        dialog.dismiss();
-                    }
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    taskViewModel.delete(convertToTaskEntity(task));
+                    applyFiltersAndSort();
                 })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                })
+                .setNegativeButton("Cancel", null)
                 .show();
     }
 
-    private void showEditTaskDialog(final Task task) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_add_task, null); // Reuse the add task dialog
-        builder.setView(dialogView);
+    private TaskEntity convertToTaskEntity(Task task) {
+        return new TaskEntity(
+                task.getId(),
+                task.getName(),
+                task.getDescription(),
+                task.getDueDate(),
+                task.getDueTime(),
+                task.getPriority(),
+                task.isCompleted()
+        );
+    }
 
-        final EditText editTextTaskName = dialogView.findViewById(R.id.editTextTaskName);
-        final EditText editTextTaskDescription = dialogView.findViewById(R.id.editTextTaskDescription);
-        final Spinner spinnerPriority = dialogView.findViewById(R.id.spinnerPriority);
-        final TextView textViewDueDate = dialogView.findViewById(R.id.textViewDueDate);
-        final Button buttonPickDate = dialogView.findViewById(R.id.buttonPickDate);
-        final TextView textViewDueTime = dialogView.findViewById(R.id.textViewDueTime);
-        final Button buttonPickTime = dialogView.findViewById(R.id.buttonPickTime);
-
-        // Populate the dialog with the task's current data
-        editTextTaskName.setText(task.getName());
-        editTextTaskDescription.setText(task.getDescription());
-
-        // Set the spinner adapter
-        ArrayAdapter<CharSequence> priorityAdapter = ArrayAdapter.createFromResource(
-                this, R.array.priority_options, android.R.layout.simple_spinner_item);
-        priorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerPriority.setAdapter(priorityAdapter);
-
-        // Set the spinner selection
-        String[] priorityOptions = getResources().getStringArray(R.array.priority_options);
-        int selectionIndex = -1;
-        for (int i = 0; i < priorityOptions.length; i++) {
-            if (priorityOptions[i].equals(task.getPriority())) {
-                selectionIndex = i;
-                break;
-            }
-        }
-
-        // Set the selection only if a matching priority is found
-        if (selectionIndex != -1) {
-            spinnerPriority.setSelection(selectionIndex);
-        } else {
-            // Handle the case where the task's priority doesn't match any option
-            // You might want to set a default selection or log an error
-            spinnerPriority.setSelection(0); // Set to the first item as a default
-            Log.e("EditDialog", "Warning: Task priority '" + task.getPriority() + "' not found in options.");
-        }
-
-        //show the date.
-        if(task.getDueDate() != null){
-            SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyy", Locale.getDefault());
-            textViewDueDate.setText(dateFormat.format(task.getDueDate()));
-        }
-        else{
-            textViewDueDate.setText("Due Date");
-        }
-
-        //show the time
-        if(task.getDueTime() != null){
-            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-            textViewDueTime.setText(timeFormat.format(task.getDueTime()));
-        }
-        else{
-            textViewDueTime.setText("Due Time");
-        }
-        final Calendar selectedCalendar = Calendar.getInstance();
-        if (task.getDueDate() != null) {
-            selectedCalendar.setTime(task.getDueDate());
-        }
-        buttonPickDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDatePickerDialog(textViewDueDate, selectedCalendar);
-            }
-        });
-
-        buttonPickTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showTimePickerDialog(textViewDueTime, selectedCalendar);
-            }
-        });
-
-        builder.setTitle("Edit Task")
-                .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String taskName = editTextTaskName.getText().toString().trim();
-                        String taskDescription = editTextTaskDescription.getText().toString().trim();
-                        String priority = spinnerPriority.getSelectedItem().toString();
-                        Date dueDate = selectedCalendar.getTime();
-                        Time dueTime = null;
-                        if (textViewDueTime.getText() != "Due Time")
-                        {
-                            try {
-                                SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                                dueTime = new Time(timeFormat.parse(textViewDueTime.getText().toString()).getTime());
-                            }
-                            catch(Exception e)
-                            {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        if (taskName.isEmpty()) {
-                            Toast.makeText(MainActivity.this, "Task name cannot be empty", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        // Update the task object
-                        task.setName(taskName);
-                        task.setDescription(taskDescription);
-                        task.setDueDate(dueDate);
-                        task.setDueTime(dueTime);
-                        task.setPriority(priority);
-
-                        // Update thetask in the database
-                        taskViewModel.update(task);
-                        dialog.dismiss();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

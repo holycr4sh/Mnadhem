@@ -1,10 +1,19 @@
 <resources>
     <string name="app_name">Mnadhem</string>
+    <string name="no_tasks_yet">No tasks yet. Add one!</string>
     <string name="Tasks">Tasks</string>
-    <string name="no_tasks_yet">No tasks yet!</string>
     <string-array name="priority_options">
-        <item>Low</item>
-        <item>Medium</item>
         <item>High</item>
+        <item>Medium</item>
+        <item>Low</item>
+    </string-array>
+    <string-array name="sort_options">
+        <item>Due Date</item>
+        <item>Priority</item>
+    </string-array>
+    <string-array name="filter_options">
+        <item>All</item>
+        <item>Completed</item>
+        <item>Incomplete</item>
     </string-array>
 </resources>

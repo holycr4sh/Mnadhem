@@ -1,0 +1,12 @@
+<resources>
+
+    <style name="Base.Theme.Mnadhem" parent="Theme.Material3.DayNight.NoActionBar">
+    </style>
+
+    <style name="Theme.Mnadhem" parent="Base.Theme.Mnadhem" />
+
+    <style name="CasualFont" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:fontFamily">@font/casual</item>
+    </style>
+
+</resources>
