@@ -30,7 +30,6 @@ import java.util.List;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.lifecycle.ViewModelProvider;
 import java.util.Date;
-import android.graphics.Paint;
 import android.widget.AdapterView;
 import java.util.Calendar;
 

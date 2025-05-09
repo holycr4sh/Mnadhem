@@ -111,12 +111,6 @@ class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
             dueDateTextView = itemView.findViewById(R.id.textViewDueDate);
             dueTimeTextView = itemView.findViewById(R.id.textViewDueTime);
             checkBoxCompleted = itemView.findViewById(R.id.checkBoxCompleted);
-
-            int whiteColor = context.getResources().getColor(R.color.white);
-            taskNameTextView.setTextColor(whiteColor);
-            dueDateTextView.setTextColor(whiteColor);
-            dueTimeTextView.setTextColor(whiteColor);
-            checkBoxCompleted.setTextColor(whiteColor);
         }
     }
 
